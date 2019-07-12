@@ -21,9 +21,6 @@ for i in range(len(columns)):
 print(feature_index)
 print("Loading models")
 start= timeit.timeit()
-rfA = load('./models/rfA.joblib')
-rfB = load('./models/rfB.joblib')
-rfC = load('./models/rfC.joblib')
 
 lrA = load('./models/lrA.joblib')
 lrB = load('./models/lrB.joblib')
@@ -42,9 +39,6 @@ for i in range(len(columns_bedroom)):
     feature_index_bedroom[columns_bedroom[i].split("_")[-1]]=i
 
 start =timeit.timeit()
-rf_bedroom1 = load('./models/rf_bedroom1.joblib')
-rf_bedroom2 = load('./models/rf_bedroom2.joblib')
-rf_bedroom3= load('./models/rf_bedroom3.joblib')
 
 lr_bedroom1 = load('./models/lr_bedroom1.joblib')
 lr_bedroom2 = load('./models/lr_bedroom2.joblib')
@@ -52,8 +46,10 @@ lr_bedroom3= load('./models/lr_bedroom3.joblib')
 end=timeit.timeit()
 
 ## Loading csv to compute kitchen shape
-kitchen_shape_entries = pd.read_csv('./kitchen_shape.csv')
+kitchen_shape_entries = pd.read_csv('./models/kitchen_shape.csv')
 
+#loading models to compute results from rule_based_classifer
+rule_based_model = pd.read_csv('./models/rule_based_classifier.csv')
 
 
 #Function to return bin based on floorplan size
@@ -87,6 +83,29 @@ def get_kitchen_shape(data):
 
     temp = kitchen_shape_entries.loc[(kitchen_shape_entries['property_config']==property_config) & (kitchen_shape_entries['bin']==bin) & (kitchen_shape_entries['city']==city)]
     return temp['kitchen_shape'].iloc[0]
+
+def predict_rule_based(data):
+    city= get_city(data)
+    bin=get_bin(data['floorplan_size'])
+    property_config= data['property_config']
+    kitchen_shape = get_kitchen_shape(data)
+    temp = rule_based_model.loc[(rule_based_model['property_config']==property_config) & (rule_based_model['bin']==bin) & (rule_based_model['city']==city)]
+    res_dict= dict(temp.iloc[0])
+    res_dict['kitchen_shape'] = kitchen_shape
+    return {
+        'kitchen':{
+            'wall_a':res_dict['wall_a'],
+            'wall_b':res_dict['wall_b'],
+            'wall_c':res_dict['wall_c'],
+            'kitchen_shape':res_dict['kitchen_shape']
+        },
+        'bedroom':{
+            'bedroom_1':res_dict['bedroom_1'],
+            'bedroom_2':res_dict['bedroom_2'],
+            'bedroom_3':res_dict['bedroom_3']
+        }
+    }
+
 
 #Function to return input vector for model
 def get_input_vector_kitchen(data):
@@ -174,8 +193,8 @@ def predict_bedroom(data):
     return {'bedroom_1':wallA,'bedroom_2':wallB,'bedroom_3':wallC}
 
 
-@app.route("/predict",methods=['POST'])
-def predict():
+@app.route("/predict_lr",methods=['POST'])
+def predict_lr():
     try:
         data  = request.get_json()
         list_attributes=['city','floorplan_size','property_config']
@@ -185,6 +204,22 @@ def predict():
         kitchen_output= predict_kitchen(data)
         bedroom_output= predict_bedroom(data)
 
+
+        return jsonify({'kitchen':kitchen_output,'bedroom':bedroom_output})
+    except:
+        return jsonify({'msg':"Unexpected Input or Internal Server error"})
+
+
+@app.route("/predict_rule",methods=['POST'])
+def predict_rule():
+    try:
+        data  = request.get_json()
+        list_attributes=['city','floorplan_size','property_config']
+        for i in list_attributes:
+            if(i not in data):
+                return jsonify({'msg':"Mandatory Params missing"})
+
+        return jsonify(predict_rule_based(data))
 
         return jsonify({'kitchen':kitchen_output,'bedroom':bedroom_output})
     except:

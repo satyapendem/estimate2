@@ -7,7 +7,8 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 
-df = pd.read_csv('./Estimator 2.0 Data Analysis - visualize_kitchen_shape.csv')
+#provide the file path to input
+df = pd.read_csv('../input_csv/input_csv.csv')
 #removing very high floor plan sizes( Only 1 sample)
 df=df[df['Floorplan Size']<=5000]
 #Binning by quantiles
@@ -36,13 +37,6 @@ features = pd.get_dummies(df_new[['Property Config','binned','City']])
 output=df_new[['Wall A','Wall B','Wall C']]
 print(features.columns)
 
-def random_forestA(x_train, x_test, y_train, y_test):
-    rf = RandomForestRegressor(n_estimators= 23, min_samples_split= 5, min_samples_leaf= 1, max_features= 'sqrt', max_depth= 1, bootstrap= True,random_state=21)
-    rf.fit(x_train,y_train)
-    predictions  =  rf.predict(x_test)
-    print("train error",mean_squared_error(rf.predict(x_train),y_train))
-    print("test error",mean_squared_error(predictions,y_test))
-    return rf,rf.predict(x_train),predictions
 
 def linear_regressionA(x_train, x_test, y_train, y_test):
     rf = Ridge(normalize=True,alpha=3)
@@ -53,15 +47,6 @@ def linear_regressionA(x_train, x_test, y_train, y_test):
     return rf,rf.predict(x_train).reshape(-1),predictions.reshape(-1)
 
 
-#model definition for wall B
-def random_forestB(x_train, x_test, y_train, y_test):
-    rf = RandomForestRegressor(n_estimators= 34, min_samples_split= 30, min_samples_leaf= 2, max_features= 'auto', max_depth= 40, bootstrap= True)
-    rf.fit(x_train,y_train)
-    predictions  =  rf.predict(x_test)
-    print("train error",mean_squared_error(rf.predict(x_train),y_train))
-    print("test error",mean_squared_error(predictions,y_test))
-    return rf,rf.predict(x_train),predictions
-
 def linear_regressionB(x_train, x_test, y_train, y_test):
     rf = Ridge(alpha=2)
     rf.fit(x_train,y_train)
@@ -70,14 +55,6 @@ def linear_regressionB(x_train, x_test, y_train, y_test):
     print("test error",mean_squared_error(predictions,y_test))
     return rf,rf.predict(x_train).reshape(-1),predictions.reshape(-1)
 
-#model definition for wall C
-def random_forestC(x_train, x_test, y_train, y_test):
-    rf = RandomForestRegressor(n_estimators= 12,min_samples_split= 30,min_samples_leaf= 1,max_features= 'auto',max_depth= 30,bootstrap= True)
-    rf.fit(x_train,y_train)
-    predictions  =  rf.predict(x_test)
-    print("train error",mean_squared_error(rf.predict(x_train),y_train))
-    print("test error",mean_squared_error(predictions,y_test))
-    return rf,rf.predict(x_train),predictions
 
 def linear_regressionC(x_train, x_test, y_train, y_test):
     rf = Ridge(alpha=2)
@@ -105,19 +82,12 @@ y_trainC = y_train[y_train['Wall C'].notna()]['Wall C']
 X_testC = X_test[y_test['Wall C'].notna()]
 y_testC = y_test[y_test['Wall C'].notna()]['Wall C']
 
-rfA, train_predA, test_predA = random_forestA(X_trainA, X_testA, y_trainA, y_testA)
-rfB, train_predA, test_predA = random_forestB(X_trainB, X_testB, y_trainB, y_testB)
-rfC, train_predC, test_predC = random_forestC(X_trainC, X_testC, y_trainC, y_testC)
 
 lrA, train_predA, test_predA = linear_regressionA(X_trainA, X_testA, y_trainA, y_testA)
 lrB, train_predA, test_predA = linear_regressionB(X_trainB, X_testB, y_trainB, y_testB)
 lrC, train_predC, test_predC = linear_regressionC(X_trainC, X_testC, y_trainC, y_testC)
 
 
-dump(rfA, './models/rfA.joblib')
-dump(rfB, './models/rfB.joblib')
-dump(rfC, './models/rfC.joblib')
-
-dump(lrA, './models/lrA.joblib')
-dump(lrB, './models/lrB.joblib')
-dump(lrC, './models/lrC.joblib')
+dump(lrA, '../models/lrA.joblib')
+dump(lrB, '../models/lrB.joblib')
+dump(lrC, '../models/lrC.joblib')

@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('./Estimator 2.0 Data Analysis - visualize_kitchen_shape.csv')
+#provide the file path to input
+df = pd.read_csv('../input_csv/input_csv.csv')
 #removing very high floor plan sizes( Only 1 sample)
 df=df[df['Floorplan Size']<=5000]
 #Binning by quantiles
@@ -44,4 +45,4 @@ for b in binned:
             d_temp = {'property_config':p,'city':c,'bin':b,'kitchen_shape':mode}
             list_entries.append(d_temp)
 df_entries = pd.DataFrame(list_entries)
-df_entries.to_csv('./kitchen_shape.csv')
+df_entries.to_csv('../models/kitchen_shape.csv')

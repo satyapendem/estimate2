@@ -7,8 +7,8 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 
-
-df = pd.read_csv('./Estimator 2.0 Data Analysis - visualize_kitchen_shape.csv')
+#provide the file path to input
+df = pd.read_csv('../input_csv/input_csv.csv')
 #removing very high floor plan sizes( Only 1 sample)
 df=df[df['Floorplan Size']<=5000]
 #Binning by quantiles
@@ -34,14 +34,6 @@ df_new.loc[df['City']=='Hyderabad',"City"]='Hyderabad'
 
 
 
-def random_forest_bedroom1(x_train, x_test, y_train, y_test):
-    rf = RandomForestRegressor(n_estimators= 23,min_samples_split= 5,min_samples_leaf= 1,max_features= 'sqrt',max_depth= 1,bootstrap= True)
-    rf.fit(x_train,y_train)
-    predictions  =  rf.predict(x_test)
-    print("train error",mean_squared_error(rf.predict(x_train),y_train))
-    print("test error",mean_squared_error(predictions,y_test))
-    return rf, rf.predict(x_train),predictions
-
 def linear_regression_bedroom1(x_train, x_test, y_train, y_test):
     rf = Ridge(normalize=True,alpha=1)
     rf.fit(x_train,y_train)
@@ -60,13 +52,6 @@ def linear_regression_bedroom2(x_train, x_test, y_train, y_test):
     print("test error",mean_squared_error(predictions,y_test))
     return rf,rf.predict(x_train).reshape(-1),predictions.reshape(-1)
 
-def random_forest_bedroom2(x_train, x_test, y_train, y_test):
-    rf = RandomForestRegressor(n_estimators= 23,min_samples_split= 5,min_samples_leaf= 1,max_features= 'sqrt',max_depth= 1,bootstrap= True)
-    rf.fit(x_train,y_train)
-    predictions  =  rf.predict(x_test)
-    print("train error",mean_squared_error(rf.predict(x_train),y_train))
-    print("test error",mean_squared_error(predictions,y_test))
-    return rf,rf.predict(x_train),predictions
 
 
 #model definition for bedroom 3
@@ -78,16 +63,9 @@ def linear_regression_bedroom3(x_train, x_test, y_train, y_test):
     print("test error",mean_squared_error(predictions,y_test))
     return rf,rf.predict(x_train).reshape(-1),predictions.reshape(-1)
 
-def random_forest_bedroom3(x_train, x_test, y_train, y_test):
-    rf = RandomForestRegressor(n_estimators= 12,min_samples_split= 5,min_samples_leaf= 4,max_features= 'sqrt',max_depth= 100,bootstrap= True)
-    rf.fit(x_train,y_train)
-    predictions  =  rf.predict(x_test)
-    print("train error",mean_squared_error(rf.predict(x_train),y_train))
-    print("test error",mean_squared_error(predictions,y_test))
-    return rf,rf.predict(x_train),predictions
 
 
-#Removing nan values
+#Removing nan values and assuming minimum bedroom wall size to be 2
 df_b1 = df_new[df_new['Bedroom 1'] >=2]
 df_b2 = df_new[df_new['Bedroom 2'] >=2]
 df_b3 = df_new[df_new['Bedroom 3'] >=2]
@@ -104,34 +82,29 @@ output_b3 =df_b3[['Bedroom 3']]
 
 print("For Bedroom 1")
 X_train, X_test, y_train, y_test = train_test_split(features_b1,output_b1, test_size=.1)
-print("Random Forest")
-rfA, train_predA, test_predA = random_forest_bedroom1(X_train, X_test, y_train, y_test)
+
 print('Linear Regression')
 lrA, train_predA, test_predA = linear_regression_bedroom1(X_train, X_test, y_train, y_test)
 
 
 print("For Bedroom 2")
 X_train, X_test, y_train, y_test = train_test_split(features_b2,output_b2, test_size=.1)
-print("Random Forest")
-rfB, train_predA,test_predA = random_forest_bedroom2(X_train, X_test, y_train, y_test)
+
 print("Linear Regression")
 lrB, train_predA, test_predA = linear_regression_bedroom2(X_train, X_test, y_train, y_test)
 
 
 print("For Bedroom 3")
 X_train, X_test, y_train, y_test = train_test_split(features_b3,output_b3, test_size=.1)
-print("Random Forest")
-rfC, train_predC, test_predC = random_forest_bedroom3(X_train, X_test, y_train, y_test)
+
 print("Linear Regression")
 lrC, train_predC, test_predC = linear_regression_bedroom3(X_train, X_test, y_train, y_test)
 
-dump(rfA, './models/rf_bedroom1.joblib')
-dump(rfB, './models/rf_bedroom2.joblib')
-dump(rfC, './models/rf_bedroom3.joblib')
 
-dump(lrA, './models/lr_bedroom1.joblib')
-dump(lrB, './models/lr_bedroom2.joblib')
-dump(lrC, './models/lr_bedroom3.joblib')
+
+dump(lrA, '../models/lr_bedroom1.joblib')
+dump(lrB, '../models/lr_bedroom2.joblib')
+dump(lrC, '../models/lr_bedroom3.joblib')
 
 
 print(features_b1.columns)
