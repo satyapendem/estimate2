@@ -34,6 +34,9 @@ columns_bedroom =['Property Config_1 BHK', 'Property Config_2 BHK',
        'binned_2', 'binned_3', 'binned_4', 'City_Bengaluru', 'City_Chennai',
        'City_Hyderabad', 'City_Kolkata', 'City_Mumbai', 'City_NCR',
        'City_Pune']
+
+valid_cities = set(['Mumbai','Bengaluru','Hyderabad','Kolkata','NCR','Chennai','Pune'])
+
 feature_index_bedroom={}
 for i in range(len(columns_bedroom)):
     feature_index_bedroom[columns_bedroom[i].split("_")[-1]]=i
@@ -74,7 +77,10 @@ def get_city(data):
     elif (city in mumbai):
         return "Mumbai"
     else:
-        return city
+        if(city in valid_cities):
+            return city
+        else:
+            return "Bengaluru"
 
 def get_kitchen_shape(data):
     city=get_city(data)
