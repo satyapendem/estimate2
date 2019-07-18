@@ -4,6 +4,7 @@ from joblib import dump, load
 import numpy as np
 import timeit
 import pandas as pd
+import math
 
 app = Flask(__name__)
 
@@ -100,15 +101,15 @@ def predict_rule_based(data):
     res_dict['kitchen_shape'] = kitchen_shape
     return {
         'kitchen':{
-            'wall_a':res_dict['wall_a'],
-            'wall_b':res_dict['wall_b'],
-            'wall_c':res_dict['wall_c'],
+            'wall_a':convert_feet_inch(res_dict['wall_a']),
+            'wall_b':convert_feet_inch(res_dict['wall_b']),
+            'wall_c':convert_feet_inch(res_dict['wall_c']),
             'kitchen_shape':res_dict['kitchen_shape']
         },
         'bedroom':{
-            'bedroom_1':res_dict['bedroom_1'],
-            'bedroom_2':res_dict['bedroom_2'],
-            'bedroom_3':res_dict['bedroom_3']
+            'bedroom_1':convert_feet_inch(res_dict['bedroom_1']),
+            'bedroom_2':convert_feet_inch(res_dict['bedroom_2']),
+            'bedroom_3':convert_feet_inch(res_dict['bedroom_3'])
         }
     }
 
@@ -173,7 +174,7 @@ def predict_kitchen(data):
     wallB=wallB[0]
     wallC = lrC.predict(model_input.reshape(1,-1))
     wallC=wallC[0]
-    return {'wall_a':wallA,'wall_b':wallB,'wall_c':wallC,'kitchen_shape':kitchen_shape}
+    return {'wall_a':convert_feet_inch(wallA),'wall_b':convert_feet_inch(wallB),'wall_c':convert_feet_inch(wallC),'kitchen_shape':kitchen_shape}
 
 def predict_bedroom(data):
     list_attributes=['city','floorplan_size','property_config']
@@ -196,7 +197,14 @@ def predict_bedroom(data):
     if(property_config!='1 BHK' and property_config!='2 BHK'):
         wallC = lr_bedroom3.predict(model_input.reshape(1,-1))
         wallC=wallC[0][0]
-    return {'bedroom_1':wallA,'bedroom_2':wallB,'bedroom_3':wallC}
+    return {'bedroom_1':convert_feet_inch(wallA),'bedroom_2':convert_feet_inch(wallB),'bedroom_3':convert_feet_inch(wallC)}
+
+def convert_feet_inch(a):
+    inch = a*12
+    f= math.floor(inch/12)
+    i = round((inch%12)/100,2)
+    return f+i
+
 
 
 @app.route("/predict_lr",methods=['POST'])
@@ -218,18 +226,18 @@ def predict_lr():
 
 @app.route("/predict_rule",methods=['POST'])
 def predict_rule():
-    try:
-        data  = request.get_json()
-        list_attributes=['city','floorplan_size','property_config']
-        for i in list_attributes:
-            if(i not in data):
-                return jsonify({'msg':"Mandatory Params missing"})
+    # try:
+    data  = request.get_json()
+    list_attributes=['city','floorplan_size','property_config']
+    for i in list_attributes:
+        if(i not in data):
+            return jsonify({'msg':"Mandatory Params missing"})
 
-        return jsonify(predict_rule_based(data))
+    return jsonify(predict_rule_based(data))
 
-        return jsonify({'kitchen':kitchen_output,'bedroom':bedroom_output})
-    except:
-        return jsonify({'msg':"Unexpected Input or Internal Server error"})
+        #return jsonify({'kitchen':kitchen_output,'bedroom':bedroom_output})
+    # except:
+    #     return jsonify({'msg':"Unexpected Input or Internal Server error"})
 
 
 
