@@ -5,8 +5,10 @@ import numpy as np
 import timeit
 import pandas as pd
 import math
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 #Setting up model pre-requisites
 columns = ['Property Config_1 BHK', 'Property Config_2 BHK',
