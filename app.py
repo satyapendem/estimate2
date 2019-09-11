@@ -205,6 +205,8 @@ def convert_feet_inch(a):
     inch = a*12
     f= math.floor(inch/12)
     i = round((inch%12)/100,2)
+    if i >= 0.12:
+        i=0.11
     return f+i
 
 
@@ -249,4 +251,4 @@ def predict_rule():
 
 
 if(__name__=='__main__'):
-    app.run(debug=True,threaded=True)
+    app.run(debug=True,threaded=True,port=3004)
